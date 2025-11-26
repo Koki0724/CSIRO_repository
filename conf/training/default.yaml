@@ -3,3 +3,5 @@ batch_size: 32
 learning_rate: 1e-4
 num_workers: 2
 seed: 42
+random_state: 42
+n_splits: 5
