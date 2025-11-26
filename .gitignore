@@ -1,8 +1,21 @@
+# Pythonの一時ファイル
 __pycache__/
-*.pyc
-.DS_Store
+*.py[cod]
+
+# 環境設定・機密情報
+.env
+kaggle.json
 .ipynb_checkpoints/
+
+# データセットと出力結果
+data/
 output/
 wandb/
-data/
-kaggle.json
+mlruns/
+
+# Kaggleアップロード用の一時フォルダ (これ重要！)
+upload_dist/
+
+# OSのサムネイルファイルなど
+.DS_Store
+Thumbs.db
