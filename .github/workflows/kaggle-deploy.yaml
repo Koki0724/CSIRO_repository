@@ -1,0 +1,45 @@
+name: Upload to Kaggle
+
+# mainブランチにpushされた時だけ動く
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      # 以下のファイルが変わった時だけ実行（無駄な実行を防ぐ）
+      - "bin/**"
+      - "conf/**"
+      - "src/**"
+      - "requirements.txt"
+      - "dataset-metadata.json"
+      - ".github/workflows/kaggle-deploy.yaml"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Install Kaggle API
+        run: pip install kaggle
+
+      - name: Create upload directory
+        # GitHubのサーバーはLinuxなので、cpコマンドを使います
+        run: |
+          mkdir -p upload_dist
+          cp -r bin conf src requirements.txt dataset-metadata.json upload_dist/
+
+      - name: Upload to Kaggle
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+        run: |
+          # 更新メッセージにコミットログを含める
+          kaggle datasets version -p upload_dist -m "Auto update: ${{ github.event.head_commit.message }}" --dir-mode zip
