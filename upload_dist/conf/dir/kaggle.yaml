@@ -1,4 +1,0 @@
-# Kaggle Notebook用のパス
-data_dir: /kaggle/input/csiro-biomass # コンペのデータセット名に合わせて修正
-output_dir: /kaggle/working
-code_dir: /kaggle/input/csiro-code # アップロードしたコードDatasetのパス
