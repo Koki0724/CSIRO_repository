@@ -1,0 +1,9 @@
+# conf/model/resnet18.yaml
+
+# さっき作ったクラスの場所を指定
+_target_: src.models.base.TimmModel
+
+# クラスに渡す引数
+model_name: "resnet18"
+pretrained: true
+num_classes: 1
