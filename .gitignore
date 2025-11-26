@@ -8,7 +8,7 @@ kaggle.json
 .ipynb_checkpoints/
 
 # データセットと出力結果
-data/
+/data/
 output/
 wandb/
 mlruns/
