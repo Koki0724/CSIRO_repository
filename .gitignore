@@ -12,6 +12,8 @@ data/
 output/
 wandb/
 mlruns/
+pretrained_models/
+working/
 
 # Kaggleアップロード用の一時フォルダ (これ重要！)
 upload_dist/

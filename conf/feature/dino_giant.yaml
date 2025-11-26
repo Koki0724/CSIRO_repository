@@ -1,0 +1,3 @@
+_target_: src.features.dino.DinoExtractor
+model_name: "facebook/dinov2-giant"
+device: "cuda"
