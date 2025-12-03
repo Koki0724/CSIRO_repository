@@ -4,7 +4,7 @@
 defaults:
   - override /feature: dino_giant
   - override /model: lasso
-  - override /training: lasso.yaml # Lasso用の学習設定(n_splitsなど)
+  - override /training: null # Lasso用の学習設定(n_splitsなど)
   - override /inference: null # 推論設定は使わない
 
 # 3. 保存フォルダ名 (ファイル名と同じにするのが通例)
