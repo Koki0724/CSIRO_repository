@@ -12,6 +12,7 @@ defaults:
   - inference: convnext # 今回追加したもの
   - training: null # 推論だけなら不要
   - override hydra/job_logging: disabled
+  - experiment: null
 
 exp_name: convnext_inference
 
