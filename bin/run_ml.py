@@ -106,7 +106,7 @@ def main(cfg: DictConfig):
     for _, entry in test_df.iterrows():
         sample_id = entry['sample_id']
         img_name, target_name = sample_id.split('__')
-        X_test = np.array(test_embeds[img_name])
+        X_test = np.array(test_embeds[img_name]).reshape(1, -1)
         target_idx = target_mapping[target_name]
         fold_preds = [reg.predict(X_test) for reg in regressors[target_idx]]
         prediction = np.mean(fold_preds)
