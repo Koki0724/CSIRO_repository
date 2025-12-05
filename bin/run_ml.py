@@ -17,7 +17,7 @@ from PIL import Image
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from src.data.preprocessing import get_unique_image_paths, prepare_train_xy, parse_test_row, TARGET_COLUMNS
-from src.utils.utils import calc_metrics
+from src.utils.utils import calc_metrics, calc_weighted_metrics
 
 @hydra.main(config_path="../conf", config_name="config", version_base=None)
 def main(cfg: DictConfig):
@@ -29,6 +29,7 @@ def main(cfg: DictConfig):
     
     # --- 2. 学習データの読み込みと特徴抽出 ---
     train_df = pd.read_csv(os.path.join(ROOT, "train.csv"))
+    
     unique_train_images = train_df.drop_duplicates(subset=['image_path']).reset_index()
 
     targets = [[] for _ in range(5)]
@@ -53,6 +54,7 @@ def main(cfg: DictConfig):
     regressors = [[None for _ in range(5)] for _ in range(5)]
     # Initialize an array to store OOF predictions
     oof_preds_np = np.zeros((len(embeds_np), 5))
+    valid_weights = [0.1, 0.1, 0.1, 0.5, 0.2]  # Example weights for each target
 
     print("  Training Lasso regression models...")
     for i in range(5): # For each target (Dry_Clover_g, Dry_Dead_g, ...)
@@ -79,15 +81,20 @@ def main(cfg: DictConfig):
             print(f"  Fold {fold}: RMSE={rmse:.4f}, R2={r2:.4f}")
     
             regressors[i][fold] = reg # Also save the model for test prediction
-        
-        target_columns = ['Dry_Clover_g', 'Dry_Dead_g', 'Dry_Green_g', 'Dry_Total_g', 'GDM_g']
-        oof_df = pd.DataFrame(oof_preds_np, columns=target_columns)
-        oof_df['image_path'] = unique_train_images['image_path']
-        oof_df.to_csv(f'oof_model_{cfg.exp_name}.csv', index=False)
-        all_rmse =  fold_scores[0][0]*0.1 + fold_scores[1][0]*0.1 + fold_scores[2][0]*0.1 + fold_scores[3][0]*0.5 + fold_scores[4][0]*0.2
-        all_r2 = fold_scores[0][1]*0.1 + fold_scores[1][1]*0.1 + fold_scores[2][1]*0.1 + fold_scores[3][1]*0.5 + fold_scores[4][1]*0.2
-        print(f"Average RMSE: {all_rmse:.4f}, Average R2: {all_r2:.4f}")
 
+        avg_rmse = np.mean([score[0] for score in fold_scores])
+        avg_r2 = np.mean([score[1] for score in fold_scores])
+        print(f"Average RMSE: {avg_rmse:.4f}, Average R2: {avg_r2:.4f}")
+    
+    valid_weights = [0.1, 0.1, 0.1, 0.5, 0.2]
+    rmse, r2 = calc_weighted_metrics(targets, oof_preds_np, valid_weights)
+    print(f"\n=== Overall CV Score ===")
+    print(f"Weighted RMSE: {rmse:.5f}")
+    print(f"Weighted R2:   {r2:.5f}")
+    target_columns = ['Dry_Clover_g', 'Dry_Dead_g', 'Dry_Green_g', 'Dry_Total_g', 'GDM_g']
+    oof_df = pd.DataFrame(oof_preds_np, columns=target_columns)
+    oof_df['image_path'] = unique_train_images['image_path']
+    oof_df.to_csv(f'oof_model_{cfg.exp_name}.csv', index=False)
 
     print("  Running predictions on test data...")
     test_df = pd.read_csv(os.path.join(ROOT, "test.csv"))
@@ -116,6 +123,7 @@ def main(cfg: DictConfig):
     submission = pd.DataFrame({'sample_id': sample_ids, 'target': predictions})
     submission.sort_values('sample_id').reset_index(drop=True)
     submission.to_csv(f'submission.csv', index=False)
+    print("Submission file 'submission.csv' created.")
 
 
 if __name__ == "__main__":
