@@ -14,7 +14,7 @@ defaults:
   - experiment: null
   - override hydra/job_logging: disabled
 
-exp_name: convnext_inference
+exp_name: test
 
 hydra:
   run:
