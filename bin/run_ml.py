@@ -7,7 +7,7 @@ import numpy as np
 import torch
 import gc
 from tqdm import tqdm
-from sklearn.linear_model import Lasso
+from sklearn.preprocessing import StandardScaler, Normalizer
 from PIL import Image
 import wandb 
 
@@ -82,6 +82,21 @@ def main(cfg: DictConfig):
             
             X_train, y_train = embeds_np[train_mask], y_target_all[train_mask]
             X_val, y_val = embeds_np[val_mask], y_target_all[val_mask]
+
+            norm_config = cfg.get("normalization", None)
+            scaler = None
+            if norm_config == "standard":
+                scaler = StandardScaler()
+            elif norm_config == "l2":
+                scaler = Normalizer(norm='l2')
+            
+            if scaler is not None:
+                X_train = scaler.fit_transform(X_train)
+                # transform: 学習データの計算結果を使って変換 (重要！)
+                X_val = scaler.transform(X_val)
+                
+                if fold == 0 and i == 0:
+                    print(f"  [Info] Applied {norm_config} normalization directly to data.")
             
             # モデル学習
             reg = hydra.utils.instantiate(cfg.model)

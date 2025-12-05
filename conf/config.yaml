@@ -14,6 +14,8 @@ defaults:
   - experiment: null
   - override hydra/job_logging: disabled
 
+normalization: "standard"
+
 exp_name: test
 
 hydra:
