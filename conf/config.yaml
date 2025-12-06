@@ -15,7 +15,7 @@ defaults:
   - override hydra/job_logging: disabled
 
 normalization: "standard"
-
+wandb_mode: "online"
 exp_name: test
 
 hydra:

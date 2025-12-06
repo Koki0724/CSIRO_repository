@@ -24,7 +24,8 @@ def main(cfg: DictConfig):
         config=OmegaConf.to_container(cfg, resolve=True), 
         reinit=True,
         group=f'{cfg.model}',  
-        job_type="train"
+        job_type="train",
+        mode=cfg.get("wandb_mode", "online")
     )
 
     print(f"=== Experiment: {cfg.exp_name} ===")
