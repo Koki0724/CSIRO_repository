@@ -1,4 +1,7 @@
-_target_: sklearn.linear_model.Lasso
+_target_: src.models.override_ml.LassoWrapper
+
 alpha: 1.0
-max_iter: 1000
 random_state: 42
+
+# モデル固有の設定として正規化を持たせる
+normalization: "standard"
