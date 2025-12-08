@@ -42,7 +42,6 @@ def main(cfg: DictConfig):
     target_columns = ['Dry_Clover_g', 'Dry_Dead_g', 'Dry_Green_g', 'Dry_Total_g', 'GDM_g']
     target_mapping = {col: i for i, col in enumerate(target_columns)}
     
-    # 画像パスのリスト作成
     train_img_paths = [os.path.join(ROOT, p) for p in train_df['image_path']]
 
     limit = cfg.dir.data_limit
