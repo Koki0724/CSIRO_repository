@@ -161,11 +161,14 @@ def main(cfg: DictConfig):
         if img_name in test_embeds:
             X_test = np.array(test_embeds[img_name]).reshape(1, -1)
             target_idx = target_mapping[target_name]
-            
-            # 全Foldのモデルで推論して平均
-            fold_preds = [reg.predict(X_test)[0] for reg in regressors[target_idx]]
-            prediction = np.mean(fold_preds)
-            predictions.append(max(0.0, prediction)) # 負の値は0にクリップ
+            fold_preds = []
+            for reg in regressors[target_idx]:
+                current_row_df = test_df[test_df['sample_id'] == sample_id]
+                pred = reg.predict(X_test, df_test=current_row_df)
+                fold_preds.append(pred[0])
+                prediction = np.mean(fold_preds)
+                predictions.append(max(0.0, prediction)) 
+
         else:
             # 万が一画像が見つからない場合のフォールバック（通常は起きないはず）
             predictions.append(0.0)

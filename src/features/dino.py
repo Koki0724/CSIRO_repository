@@ -16,7 +16,6 @@ class DinoExtractor:
 
     def extract(self, image_paths: list) -> np.ndarray:
         embeds = []
-        # 高速化のためバッチ処理に変更したい場合はここを書き換える
         for img_path in tqdm(image_paths, desc="Extracting features"):
             try:
                 with Image.open(img_path) as img:

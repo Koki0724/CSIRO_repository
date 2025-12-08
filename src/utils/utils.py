@@ -43,7 +43,7 @@ def preprocess_train_data(train_df, n_splits=5):
     # ターゲット名をカラムに変換 (Wide形式へ)
     # これにより image_path と target の対応関係が完全に保証されます
     pivot_df = train_df.pivot_table(
-        index=['image_path', 'Sampling_Date', 'State'], 
+        index=['image_path', 'Sampling_Date', 'State', 'Species', 'Pre_GSHH_NDVI', 'Height_Ave_cm'], 
         columns='target_name', 
         values='target'
     ).reset_index()
