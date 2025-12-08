@@ -1,8 +1,4 @@
-# @package _group_
 _target_: src.features.siglip.SigLIPExtractor
-
 model_name: ${dir.siglip_path}
-
 batch_size: 20
-
 device: "cuda"

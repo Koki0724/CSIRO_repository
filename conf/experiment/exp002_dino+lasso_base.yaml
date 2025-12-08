@@ -7,7 +7,6 @@ defaults:
   - override /training: null
   - override /inference: null
 
-override /normalization: "standard"
-
+normalization: "standard"
 # 3. 保存フォルダ名 (ファイル名と同じにするのが通例)
 exp_name: "exp002_dino+lasso_base"

@@ -32,3 +32,6 @@ class DinoExtractor:
                 embeds.append(torch.zeros((1, self.model.config.hidden_size)))
 
         return np.array(torch.cat(embeds))
+
+
+
