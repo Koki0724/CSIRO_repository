@@ -75,7 +75,6 @@ def main(cfg: DictConfig):
         fold_rmse_list = []
         fold_r2_list = []
     
-        # ★変更: KFold.split ではなく、train_df['fold'] を使用してループ
         for fold in range(5):
             # Boolean indexing でマスクを作成
             train_mask = (train_df['fold'] != fold).values

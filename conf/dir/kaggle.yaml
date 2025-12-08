@@ -4,4 +4,5 @@ output_dir: /kaggle/working
 code_dir: /kaggle/input/csiro-code # アップロードしたコードDatasetのパス
 model_weight_dir: /kaggle/input/csiro-exp3/convnext_exp3 # モデル重みをアップロードしたDatasetのパス
 dino_giant_path: /kaggle/input/dinov2/pytorch/giant/1
+siglip_path: /kaggle/input/google-siglip-so400m-patch14-384/transformers/default/1/
 data_limit: 100

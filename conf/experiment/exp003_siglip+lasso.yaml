@@ -1,0 +1,13 @@
+# @package _global_
+
+# 1. 使うコンポーネントを強制的に指定 (override)
+defaults:
+  - override /feature: siglip
+  - override /model: lasso
+  - override /training: null
+  - override /inference: null
+
+override /normalization: "standard"
+
+# 3. 保存フォルダ名 (ファイル名と同じにするのが通例)
+exp_name: "exp003_siglip+lasso"
