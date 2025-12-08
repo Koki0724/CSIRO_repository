@@ -1,6 +1,6 @@
 # conf/model/lightgbm.yaml
 
-_target_: src.models.onerride_ml.LGBMWrapper
+_target_: src.models.override_ml.LGBMWrapper
 
 # --- 学習制御 ---
 num_boost_round: 2000
