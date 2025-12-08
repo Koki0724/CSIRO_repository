@@ -49,18 +49,8 @@ class SigLIPExtractor:
             try:
                 # 前処理
                 inputs = self.processor(images=batch_images, return_tensors="pt").to(self.device)
-                
                 with torch.no_grad():
-                    outputs = self.model(**inputs)
-
-                if hasattr(outputs, "image_embeds") and outputs.image_embeds is not None:
-                    embeds = outputs.image_embeds
-                elif hasattr(outputs, "pooler_output") and outputs.pooler_output is not None:
-                    embeds = outputs.pooler_output
-                else:
-                    # フォールバック: 隠れ層の平均やCLSトークン
-                    # (Batch, Seq, Dim) -> (Batch, Dim)
-                    embeds = outputs.last_hidden_state[:, 0]
+                    embeds = self.model.get_image_features(**inputs)
 
                 # CPUへ移動してリストに追加
                 all_embeds.append(embeds.cpu())
