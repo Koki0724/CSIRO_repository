@@ -12,10 +12,10 @@ class BaseModelWrapper:
     全てのモデルラッパーの基底クラス
     run_ml.pyからはこのインターフェースを通じて呼び出される
     """
-    def fit_predict(self, X_train, y_train, X_val, y_val, df_train, df_val):
+    def fit_predict(self, X_train, y_train, X_val, y_val):
         raise NotImplementedError
 
-    def predict(self, X_test, df_test=None):
+    def predict(self, X_test):
         raise NotImplementedError
 
 class LassoWrapper(BaseModelWrapper):
