@@ -25,7 +25,7 @@ class LassoWrapper(BaseModelWrapper):
         self.random_state = random_state
         self.model = None
 
-    def fit_predict(self, X_train, y_train, X_val, y_val, df_train, df_val):
+    def fit_predict(self, X_train, y_train, X_val):
         """
         学習を行い、Validationデータに対する予測値と学習済みモデルを返す
         """
@@ -47,7 +47,7 @@ class LassoWrapper(BaseModelWrapper):
         
         return preds, self
 
-    def predict(self, X_test, df_test=None):
+    def predict(self, X_test):
         """
         テストデータの予測
         """
@@ -68,64 +68,11 @@ class LGBMWrapper(BaseModelWrapper):
         self.model = None
         self.encoders = {} # カテゴリ変数のエンコーダー保存用
 
-    def _process_features(self, df, is_train=True):
-        """
-        テーブルデータの特徴量エンジニアリング
-        """
-        df = df.copy()
-        
-        if 'Sampling_Date' in df.columns:
-            df['Sampling_Date'] = pd.to_datetime(df['Sampling_Date'])
-            df['year'] = df['Sampling_Date'].dt.year
-            df['month'] = df['Sampling_Date'].dt.month
-            df['day_of_year'] = df['Sampling_Date'].dt.dayofyear
-            df = df.drop(columns=['Sampling_Date'])
 
-        cat_cols = ['State', 'Species']
-        for col in cat_cols:
-            if col in df.columns:
-                df[col] = df[col].fillna("Missing").astype(str)
-                
-                if is_train:
-                    le = LabelEncoder()
-                    df[col] = le.fit_transform(df[col])
-                    self.encoders[col] = le
-                else:
-                    le = self.encoders.get(col)
-                    if le:
-                        df[col] = df[col].map(lambda x: x if x in le.classes_ else le.classes_[0])
-                        df[col] = le.transform(df[col])
-
-        use_cols = ['year', 'month', 'day_of_year', 'State', 'Species', 'Pre_GSHH_NDVI', 'Height_Ave_cm']
+    def fit_predict(self, X_train, y_train, X_val, y_val):
         
-        return df[use_cols]
-
-    def _concat_embed_and_features(self, X, df_processed):
-        """
-        画像Embedding(numpy)とテーブル特徴量(DataFrame)を結合する
-        """
-        
-        X_df = pd.DataFrame(X, columns=[f"embed_{i}" for i in range(X.shape[1])])
-        
-        # テーブルデータ側もindexをリセットして横に結合
-        df_reset = df_processed.reset_index(drop=True)
-        
-        combined_df = pd.concat([X_df, df_reset], axis=1)
-        return combined_df
-
-    def fit_predict(self, X_train, y_train, X_val, y_val, df_train, df_val):
-        
-        # 1. テーブルデータの前処理
-        df_train_proc = self._process_features(df_train, is_train=True)
-        df_val_proc = self._process_features(df_val, is_train=False)
-        
-        # 2. 画像とテーブルの結合
-        X_train_all = self._concat_embed_and_features(X_train, df_train_proc)
-        X_val_all = self._concat_embed_and_features(X_val, df_val_proc)
-        
-        # 3. LightGBMデータセット作成
-        lgb_train = lgb.Dataset(X_train_all, y_train)
-        lgb_val = lgb.Dataset(X_val_all, y_val, reference=lgb_train)
+        lgb_train = lgb.Dataset(X_train, y_train)
+        lgb_val = lgb.Dataset(X_val, y_val, reference=lgb_train)
         
         # 4. 学習
         self.model = lgb.train(
@@ -139,21 +86,12 @@ class LGBMWrapper(BaseModelWrapper):
             ]
         )
         
-        preds = self.model.predict(X_val_all, num_iteration=self.model.best_iteration)
+        preds = self.model.predict(X_val, num_iteration=self.model.best_iteration)
         
         return preds, self
 
-    def predict(self, X_test, df_test=None):
+    def predict(self, X_test):
         if self.model is None:
             raise RuntimeError("Model is not fitted yet.")
         
-        if df_test is None:
-            raise ValueError("LightGBM Wrapper requires df_test for tabular features.")
-            
-        # テストデータの前処理
-        df_test_proc = self._process_features(df_test, is_train=False)
-        
-        # 結合
-        X_test_all = self._concat_embed_and_features(X_test, df_test_proc)
-        
-        return self.model.predict(X_test_all, num_iteration=self.model.best_iteration)
+        return self.model.predict(X_test, num_iteration=self.model.best_iteration)

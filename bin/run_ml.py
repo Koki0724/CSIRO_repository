@@ -81,8 +81,6 @@ def main(cfg: DictConfig):
             
             X_train, y_train = embeds_np[train_mask], y_target_all[train_mask]
             X_val, y_val = embeds_np[val_mask], y_target_all[val_mask]
-            df_train_fold = train_df.iloc[train_mask]
-            df_val_fold = train_df.iloc[val_mask]
             
             # モデル学習
             reg = hydra.utils.instantiate(cfg.model)
@@ -90,9 +88,7 @@ def main(cfg: DictConfig):
                 X_train=X_train,
                 y_train=y_train,
                 X_val=X_val,
-                y_val=y_val,
-                df_train=df_train_fold,
-                df_val=df_val_fold
+                y_val=y_val
             )
             oof_preds_np[val_mask, i] = preds
             
@@ -163,8 +159,7 @@ def main(cfg: DictConfig):
             target_idx = target_mapping[target_name]
             fold_preds = []
             for reg in regressors[target_idx]:
-                current_row_df = test_df[test_df['sample_id'] == sample_id]
-                pred = reg.predict(X_test, df_test=current_row_df)
+                pred = reg.predict(X_test)
                 fold_preds.append(pred[0])
                 prediction = np.mean(fold_preds)
                 predictions.append(max(0.0, prediction)) 
