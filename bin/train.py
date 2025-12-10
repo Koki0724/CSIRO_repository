@@ -178,6 +178,7 @@ def main(cfg: DictConfig):
             pin_memory=True,
             drop_last=True
         )
+        
         val_loader = DataLoader(
             val_dataset, 
             batch_size=cfg.training.batch_size, 
