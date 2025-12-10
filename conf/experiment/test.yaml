@@ -3,16 +3,10 @@ defaults:
   - dir: kaggle
   - dataset: deual
   - model: dino_base
-  - training: test
+  - training: test_run
 
-  - transform/train: train
-  - transform/valid: valid
+  - transform: base_transform
 
-# 実験名 (実行時に experiment=... で上書き可能)
 exp_name: "test"
-
-# WandBモード (online, offline, disabled)
 wandb_mode: "online"
-
-# シード値
 seed: 42
