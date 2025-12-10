@@ -214,7 +214,7 @@ def main(cfg: DictConfig):
         milestones=[warmup_epochs]
         )
 
-        criterion = BiomassWeightedMSELoss(weights=[0.1, 0.1, 0.1, 0.5, 0.2], device=device, columns=train_targets_cols)
+        criterion = BiomassWeightedMSELoss(weights=[0.1, 0.1, 0.1, 0.5, 0.2], device=device)
         best_val_loss = float('inf')
         best_preds = None # (N_val, 3)
         
