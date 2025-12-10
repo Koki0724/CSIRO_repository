@@ -45,8 +45,7 @@ def main(cfg: DictConfig):
         unique_paths = test_df['image_path'].unique()[:limit]
         test_df = test_df[test_df['image_path'].isin(unique_paths)].reset_index(drop=True)
 
-    # 推論は「ユニークな画像」に対して行う (効率化)
-    # 1枚の画像から3つの値を予測し、後で全行にマージするため
+
     test_df_unique = test_df.drop_duplicates(subset=['image_path']).reset_index(drop=True)
     print(f"Test images: {len(test_df_unique)}")
 

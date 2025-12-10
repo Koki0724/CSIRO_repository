@@ -31,10 +31,8 @@ def main(cfg: DictConfig):
     print(f"=== Experiment: {cfg.exp_name} ===")
     ROOT = cfg.dir.data_dir
     
-    # --- 1. 特徴抽出器の準備 ---
     extractor = hydra.utils.instantiate(cfg.feature)
     
-    # --- 2. 学習データの読み込みと加工 ---
     raw_train_df = pd.read_csv(os.path.join(ROOT, "train.csv"))
     
     train_df = preprocess_train_data(raw_train_df, n_splits=5)
@@ -59,12 +57,10 @@ def main(cfg: DictConfig):
     # Initialize an array to store OOF predictions
     oof_preds_np = np.zeros((len(embeds_np), 5))
     
-    # 各ターゲットのスコア記録用
     metrics_log = {}
 
     print("  Training Lasso regression models...")
     
-    # ターゲットごとのループ
     for i, target_name in enumerate(target_columns): 
         # このターゲットの正解ラベル (N,)
         y_target_all = targets_matrix[:, i]
@@ -108,7 +104,6 @@ def main(cfg: DictConfig):
         metrics_log[f"{target_name}_rmse"] = avg_rmse
         metrics_log[f"{target_name}_r2"] = avg_r2
     
-    # --- Overall Evaluation ---
     valid_weights = [0.1, 0.1, 0.1, 0.5, 0.2]
 
     overall_rmse, overall_r2 = calc_weighted_metrics(targets_matrix.T, oof_preds_np.T, valid_weights)
@@ -117,7 +112,6 @@ def main(cfg: DictConfig):
     print(f"Weighted RMSE: {overall_rmse:.5f}")
     print(f"Weighted R2:   {overall_r2:.5f}")
     
-    # ★追加: WandBに全体スコアと個別スコアをまとめて送信
     metrics_log["overall_weighted_rmse"] = overall_rmse
     metrics_log["overall_weighted_r2"] = overall_r2
     wandb.log(metrics_log)
@@ -153,7 +147,6 @@ def main(cfg: DictConfig):
         sample_id = entry['sample_id']
         img_name, target_name = sample_id.split('__')
         
-        # 該当画像の埋め込みを取得
         if img_name in test_embeds:
             X_test = np.array(test_embeds[img_name]).reshape(1, -1)
             target_idx = target_mapping[target_name]
@@ -165,7 +158,6 @@ def main(cfg: DictConfig):
                 predictions.append(max(0.0, prediction)) 
 
         else:
-            # 万が一画像が見つからない場合のフォールバック（通常は起きないはず）
             predictions.append(0.0)
             
         sample_ids.append(sample_id)
@@ -175,7 +167,6 @@ def main(cfg: DictConfig):
     submission.to_csv(f'submission.csv', index=False)
     print("Submission file 'submission.csv' created.")
     
-    # ★追加: WandB終了
     wandb.finish()
 
 if __name__ == "__main__":

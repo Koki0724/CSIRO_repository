@@ -1,17 +1,14 @@
 defaults:
   - _self_
   - dir: local
-
-  # === 使用するコンポーネント ===
-  # DINO+Lassoのときは feature, model, training
-  # ConvNeXtのときは model, inference
-
-  # デフォルト（とりあえずnullにしておくか、よく使うものを指定）
+  - dataset:
   - feature: null
-  - model: convnext # 今回追加したもの
+  - model: convnext
   - inference: convnext # 今回追加したもの
   - training: null # 推論だけなら不要
   - experiment: null
+  - transform/train: train
+  - transform/valid: valid
   - override hydra/job_logging: disabled
 
 normalization: "standard"

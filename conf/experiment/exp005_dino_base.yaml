@@ -1,0 +1,18 @@
+defaults:
+  - _self_
+  - dir: kaggle
+  - dataset: default
+  - model: base
+  - training: default
+
+  - transform/train: train
+  - transform/valid: valid
+
+# 実験名 (実行時に experiment=... で上書き可能)
+exp_name: "exp005_dino_base"
+
+# WandBモード (online, offline, disabled)
+wandb_mode: "online"
+
+# シード値
+seed: 42

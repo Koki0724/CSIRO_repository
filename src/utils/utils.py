@@ -1,4 +1,8 @@
 import numpy as np
+import random
+import os
+import torch
+import torch.nn as nn
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import StratifiedGroupKFold
 
@@ -59,3 +63,50 @@ def preprocess_train_data(train_df, n_splits=5):
         pivot_df.loc[val_idx, 'fold'] = fold
         
     return pivot_df
+
+def set_seed(seed=42):
+    random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
+class BiomassWeightedMSELoss(nn.Module):
+    def __init__(self, weights=[0.1, 0.1, 0.1, 0.5, 0.2], device="cuda"):
+        """
+        weights: コンペ評価指標の重みリスト
+                 [Clover, Dead, Green, Total, GDM] の順と仮定
+        """
+        super().__init__()
+        self.weights = torch.tensor(weights).to(device)
+        self.mse = nn.MSELoss(reduction='none') 
+
+    def forward(self, preds, targets):
+        """
+        preds:   Modelの出力 (Batch, 3) -> [Clover, Dead, Green] と仮定
+        targets: 正解ラベル (Batch, 5) -> [Clover, Dead, Green, Total, GDM]
+        """
+        # 1. モデルの出力 (3つ) を取り出す
+        pred_total = preds[:, 0]
+        pred_gdm   = preds[:, 1]
+        pred_green  = preds[:, 2]
+        
+        pred_clover = torch.clamp(pred_gdm - pred_green, min=0)
+        pred_dead   = torch.clamp(pred_total - pred_gdm, min=0)       
+        
+        # 3. 5つの予測値を結合 (Batch, 5)
+        # 結合するために shape を (Batch, 1) に揃える
+        preds_full = torch.stack([
+            pred_clover, 
+            pred_dead, 
+            pred_green, 
+            pred_total, 
+            pred_gdm
+        ], dim=1)
+        
+        loss = self.mse(preds_full, targets) 
+        weighted_loss = torch.sum(loss * self.weights)
+        
+        return weighted_loss
